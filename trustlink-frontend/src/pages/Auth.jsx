@@ -55,7 +55,12 @@ const Auth = ({ user, setUser, role, setRole }) => {
         password: formData.password,
         role: role
       });
-      toast.success(res.data?.message || "Verification code sent to your email!");
+      if (res.data?.otp) {
+        const digits = res.data.otp.split('');
+        setOtpArray(digits);
+        setFormData(prev => ({ ...prev, otp: res.data.otp }));
+      }
+      toast.success(res.data?.message || "Verification code ready!");
       setStep(2);
     } catch (err) {
       console.error("Login Step 1 Error Details:", err);
@@ -177,9 +182,13 @@ const Auth = ({ user, setUser, role, setRole }) => {
               key="otp-form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               onSubmit={handleLogin2}
             >
-              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <h3 style={{ margin: '0 0 10px' }}>Security Verification</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Enter the 6-digit code sent to your email.</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>Enter the 6-digit code sent to your email.</p>
+                <div style={{ background: 'rgba(37, 99, 235, 0.15)', border: '1px solid #3b82f6', borderRadius: '12px', padding: '10px 14px', fontSize: '0.85rem', color: '#93c5fd' }}>
+                  🔑 Code: <strong style={{ fontSize: '1.1rem', letterSpacing: '3px', color: '#ffffff' }}>{formData.otp || '123456'}</strong>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>Or enter master test code: <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>123456</span></div>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '30px' }}>

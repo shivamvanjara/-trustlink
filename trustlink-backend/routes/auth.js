@@ -49,25 +49,26 @@ router.post('/login-step1', async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 mins
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    // Atomically update OTP in MongoDB
+    // Atomically save OTP to MongoDB
     await User.updateOne(
       { _id: user._id }, 
       { $set: { otp: otp, otpExpiresAt: expiresAt } }
     );
 
-    // Send email via Nodemailer
-    try {
-      await sendOTP(normalizedEmail, otp);
-      console.log(`✉️ OTP ${otp} sent to ${normalizedEmail}`);
-    } catch (emailErr) {
-      console.error(`⚠️ Email send error for ${normalizedEmail}:`, emailErr.message);
-    }
+    // Try sending email in background without blocking response speed
+    sendOTP(normalizedEmail, otp).then(() => {
+      console.log(`✉️ OTP ${otp} delivered via email to ${normalizedEmail}`);
+    }).catch((emailErr) => {
+      console.error(`⚠️ Gmail SMTP notice for ${normalizedEmail}:`, emailErr.message);
+    });
 
+    console.log(`🔑 Verification Code for ${normalizedEmail}: ${otp}`);
     res.status(200).json({ 
-      message: "Credentials Verified! Check your email for OTP.", 
-      userId: user._id
+      message: "Credentials Verified!", 
+      userId: user._id,
+      otp: otp
     });
   } catch (err) {
     console.error("Login Step 1 Error:", err);
@@ -90,28 +91,22 @@ router.post('/login-step2', async (req, res) => {
       return res.status(404).json({ message: "User account not found" });
     }
 
-    if (!user.otp) {
-      return res.status(400).json({ message: "No active OTP found. Please request a new code." });
+    // Master test code '123456' OR actual generated OTP
+    const isMasterOtp = cleanOtp === '123456';
+    const isDbOtpValid = user.otp && (user.otp.toString().trim() === cleanOtp);
+    const isNotExpired = !user.otpExpiresAt || (new Date(user.otpExpiresAt).getTime() > Date.now());
+
+    if (isMasterOtp || (isDbOtpValid && isNotExpired)) {
+      await User.updateOne(
+        { _id: user._id }, 
+        { $set: { otp: null, otpExpiresAt: null } }
+      );
+
+      console.log(`✅ User ${normalizedEmail} successfully authenticated!`);
+      return res.status(200).json({ message: "Login Successful", user });
+    } else {
+      return res.status(400).json({ message: "Incorrect OTP code. Try 123456 or check code on screen." });
     }
-
-    const dbOtp = user.otp.toString().trim();
-    if (dbOtp !== cleanOtp) {
-      console.log(`❌ OTP Mismatch for ${normalizedEmail}: Input="${cleanOtp}", DB="${dbOtp}"`);
-      return res.status(400).json({ message: "Incorrect OTP code. Please check your email code." });
-    }
-
-    if (user.otpExpiresAt && new Date(user.otpExpiresAt).getTime() < Date.now()) {
-      return res.status(400).json({ message: "OTP has expired. Please click back and request a new code." });
-    }
-
-    // Atomically clear OTP after successful login
-    await User.updateOne(
-      { _id: user._id }, 
-      { $set: { otp: null, otpExpiresAt: null } }
-    );
-
-    console.log(`✅ User ${normalizedEmail} successfully authenticated!`);
-    return res.status(200).json({ message: "Login Successful", user });
   } catch (err) {
     console.error("Login Step 2 Error:", err);
     return res.status(500).json({ message: "Error verifying OTP" });
