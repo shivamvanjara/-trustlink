@@ -11,15 +11,17 @@ router.post('/signup', async (req, res) => {
     return res.status(400).json({ message: "Please fill all fields" });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
   try {
-    const userExists = await User.findOne({ email: email.toLowerCase() });
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const newUser = new User({ email, password, role });
+    const newUser = new User({ email: normalizedEmail, password, role });
     await newUser.save();
-    console.log(`👤 New ${role} Registered: ${email}`);
+    console.log(`👤 New ${role} Registered: ${normalizedEmail}`);
     res.status(201).json({ message: "Account Created! Please Login." });
   } catch (err) {
     console.error("Signup Error:", err);
@@ -29,9 +31,15 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login-step1', async (req, res) => {
   const { email, password, role } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and Password are required" });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
   try {
     const user = await User.findOne({ 
-      email: email.toLowerCase().trim(), 
+      email: normalizedEmail, 
       password: password, 
       role: role 
     });
@@ -41,24 +49,33 @@ router.post('/login-step1', async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = otp;
+    otpStore[normalizedEmail] = otp;
 
-    await sendOTP(email, otp);
-    console.log(`🔑 OTP ${otp} sent to ${email}`);
-    res.status(200).json({ message: "Credentials Correct! OTP Sent.", userId: user._id });
+    try {
+      await sendOTP(normalizedEmail, otp);
+      console.log(`🔑 OTP ${otp} sent to email: ${normalizedEmail}`);
+    } catch (emailErr) {
+      console.error(`⚠️ Email sending failed for ${normalizedEmail}:`, emailErr.message);
+      console.log(`🔑 [FALLBACK LOG] Use OTP: ${otp} for email ${normalizedEmail}`);
+    }
+
+    res.status(200).json({ message: "Credentials Correct! Check OTP.", userId: user._id });
   } catch (err) {
-    res.status(500).json({ message: "Error during Login" });
+    console.error("Login Step 1 Error:", err);
+    res.status(500).json({ message: "Error during Login: " + err.message });
   }
 });
 
 router.post('/login-step2', async (req, res) => {
   const { email, otp } = req.body;
-  if (otpStore[email] === otp) {
-    delete otpStore[email];
-    const user = await User.findOne({ email: email.toLowerCase() });
+  const normalizedEmail = email ? email.trim().toLowerCase() : '';
+
+  if (otpStore[normalizedEmail] && otpStore[normalizedEmail] === otp.trim()) {
+    delete otpStore[normalizedEmail];
+    const user = await User.findOne({ email: normalizedEmail });
     res.status(200).json({ message: "Login Successful", user });
   } else {
-    res.status(400).json({ message: "Invalid OTP" });
+    res.status(400).json({ message: "Invalid or Expired OTP" });
   }
 });
 
