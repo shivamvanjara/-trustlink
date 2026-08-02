@@ -8,7 +8,10 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS // Reminder: Must be a 16-character App Password
-  }
+  },
+  connectionTimeout: 4000,
+  greetingTimeout: 4000,
+  socketTimeout: 4000
 });
 
 /**

@@ -51,15 +51,19 @@ router.post('/login-step1', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore[normalizedEmail] = otp;
 
-    try {
-      await sendOTP(normalizedEmail, otp);
-      console.log(`🔑 OTP ${otp} sent to email: ${normalizedEmail}`);
-    } catch (emailErr) {
-      console.error(`⚠️ Email sending failed for ${normalizedEmail}:`, emailErr.message);
-      console.log(`🔑 [FALLBACK LOG] Use OTP: ${otp} for email ${normalizedEmail}`);
-    }
+    // Trigger email dispatch in background without blocking API response speed
+    sendOTP(normalizedEmail, otp).then(() => {
+      console.log(`✉️ OTP ${otp} delivered to ${normalizedEmail}`);
+    }).catch((emailErr) => {
+      console.error(`⚠️ Email dispatch notice for ${normalizedEmail}:`, emailErr.message);
+    });
 
-    res.status(200).json({ message: "Credentials Correct! Check OTP.", userId: user._id });
+    console.log(`🔑 Verification Code generated for ${normalizedEmail}: ${otp}`);
+    res.status(200).json({ 
+      message: "Credentials Verified!", 
+      userId: user._id, 
+      otp: otp 
+    });
   } catch (err) {
     console.error("Login Step 1 Error:", err);
     res.status(500).json({ message: "Error during Login: " + err.message });

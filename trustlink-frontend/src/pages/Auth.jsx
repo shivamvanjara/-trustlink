@@ -59,7 +59,14 @@ const Auth = ({ user, setUser, role, setRole }) => {
         role: role
       });
       clearTimeout(slowNotice);
-      toast.success(res.data?.message || "Credentials Correct!");
+      if (res.data?.otp) {
+        const digits = res.data.otp.split('');
+        setOtpArray(digits);
+        setFormData(prev => ({ ...prev, otp: res.data.otp }));
+        toast.success(`Code: ${res.data.otp} (Sent to Email)`, { duration: 8000, icon: '🔑' });
+      } else {
+        toast.success("Security Code Sent to Email!");
+      }
       setStep(2);
     } catch (err) {
       clearTimeout(slowNotice);
