@@ -48,9 +48,6 @@ const Auth = ({ user, setUser, role, setRole }) => {
   const handleLogin1 = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const slowNotice = setTimeout(() => {
-      toast("Waking up backend server (Render free tier), please wait...", { icon: "⏳", duration: 5000 });
-    }, 4000);
 
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login-step1`, {
@@ -58,18 +55,9 @@ const Auth = ({ user, setUser, role, setRole }) => {
         password: formData.password,
         role: role
       });
-      clearTimeout(slowNotice);
-      if (res.data?.otp) {
-        const digits = res.data.otp.split('');
-        setOtpArray(digits);
-        setFormData(prev => ({ ...prev, otp: res.data.otp }));
-        toast.success(`Code: ${res.data.otp} (Sent to Email)`, { duration: 8000, icon: '🔑' });
-      } else {
-        toast.success("Security Code Sent to Email!");
-      }
+      toast.success(res.data?.message || "Verification code sent to your email!");
       setStep(2);
     } catch (err) {
-      clearTimeout(slowNotice);
       console.error("Login Step 1 Error Details:", err);
       const errorMsg = err.response?.data?.message || 
         (err.message === "Network Error" || !err.response 
@@ -77,7 +65,6 @@ const Auth = ({ user, setUser, role, setRole }) => {
           : err.message || "Login Failed");
       toast.error(errorMsg, { duration: 6000 });
     } finally {
-      clearTimeout(slowNotice);
       setLoading(false);
     }
   };
@@ -100,17 +87,23 @@ const Auth = ({ user, setUser, role, setRole }) => {
 
   const handleLogin2 = async (e) => {
     e.preventDefault();
+    const finalOtp = otpArray.join('').trim();
+    if (finalOtp.length !== 6) {
+      toast.error("Please enter all 6 digits of your OTP");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login-step2`, {
         email: formData.email,
-        otp: formData.otp
+        otp: finalOtp
       });
       setUser(res.data.user);
-      toast.success("Identity Verified");
+      toast.success("Identity Verified!");
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || "Invalid OTP");
+      toast.error(err.response?.data?.message || "Invalid OTP code");
     } finally {
       setLoading(false);
     }
@@ -184,14 +177,9 @@ const Auth = ({ user, setUser, role, setRole }) => {
               key="otp-form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               onSubmit={handleLogin2}
             >
-              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                 <h3 style={{ margin: '0 0 10px' }}>Security Verification</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>Enter the 6-digit code sent to your email.</p>
-                {formData.otp && (
-                  <div style={{ background: 'rgba(37, 99, 235, 0.15)', border: '1px solid #3b82f6', borderRadius: '12px', padding: '12px', fontSize: '0.9rem', color: '#93c5fd' }}>
-                    🔑 Verification Code: <strong style={{ fontSize: '1.1rem', letterSpacing: '3px', color: '#ffffff' }}>{formData.otp}</strong>
-                  </div>
-                )}
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Enter the 6-digit code sent to your email.</p>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '30px' }}>

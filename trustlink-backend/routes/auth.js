@@ -50,27 +50,26 @@ router.post('/login-step1', async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Store OTP in MongoDB with 15-minute expiration
+    // Store OTP in MongoDB with 30-minute expiration window
     user.otp = otp;
-    user.otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    user.otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
     await user.save();
 
-    // Trigger email dispatch in background
-    sendOTP(normalizedEmail, otp).then(() => {
-      console.log(`✉️ OTP ${otp} delivered to ${normalizedEmail}`);
-    }).catch((emailErr) => {
+    // Await email dispatch via Nodemailer
+    try {
+      await sendOTP(normalizedEmail, otp);
+      console.log(`✉️ OTP ${otp} delivered via email to ${normalizedEmail}`);
+    } catch (emailErr) {
       console.error(`⚠️ Email dispatch notice for ${normalizedEmail}:`, emailErr.message);
-    });
+    }
 
-    console.log(`🔑 Verification Code generated for ${normalizedEmail}: ${otp}`);
     res.status(200).json({ 
-      message: "Credentials Verified!", 
-      userId: user._id, 
-      otp: otp 
+      message: "Credentials Verified! Check your email for OTP.", 
+      userId: user._id
     });
   } catch (err) {
     console.error("Login Step 1 Error:", err);
-    res.status(500).json({ message: "Error during Login: " + err.message });
+    res.status(500).json({ message: "Error sending OTP email: " + err.message });
   }
 });
 
@@ -85,16 +84,20 @@ router.post('/login-step2', async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const isOtpValid = user.otp && user.otp === cleanOtp;
-    const isNotExpired = user.otpExpiresAt && new Date(user.otpExpiresAt) > new Date();
+    console.log(`🔍 Verifying OTP for ${normalizedEmail}. Input: "${cleanOtp}", DB Stored: "${user.otp}"`);
+
+    const isOtpValid = user.otp && (user.otp.toString().trim() === cleanOtp);
+    const isNotExpired = !user.otpExpiresAt || (new Date(user.otpExpiresAt).getTime() > Date.now());
 
     if (isOtpValid && isNotExpired) {
       user.otp = null;
       user.otpExpiresAt = null;
       await user.save();
-      res.status(200).json({ message: "Login Successful", user });
+      console.log(`✅ OTP Verified successfully for ${normalizedEmail}`);
+      return res.status(200).json({ message: "Login Successful", user });
     } else {
-      res.status(400).json({ message: "Invalid or Expired OTP. Please login again." });
+      console.log(`❌ OTP Failed for ${normalizedEmail}. Valid: ${isOtpValid}, NotExpired: ${isNotExpired}`);
+      return res.status(400).json({ message: "Invalid OTP code. Please check your email code and try again." });
     }
   } catch (err) {
     console.error("Login Step 2 Error:", err);
