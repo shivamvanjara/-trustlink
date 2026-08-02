@@ -32,16 +32,25 @@ const bondSchema = new mongoose.Schema({
       'MUTUAL_CANCEL_REQ_PROVIDER',
       'MUTUAL_CANCEL_REQ_SEEKER',
       'MUTUALLY_CANCELLED', 
-      'BREACHED'
+      'BREACHED',
+      'DISPUTED',
+      'ADMIN_RESOLVED'
     ],
     default: 'PENDING_SEEKER_PAYMENT'
   },
   
+  // Decorum Breach & Admin Resolution Fields
+  disputeReason: { type: String, default: '' },
+  disputeReportedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  adminResolution: { type: String, default: '' },
+  slashedPenaltyAmount: { type: Number, default: 0 },
+  protocolFeeCollected: { type: Number, default: 0 },
+
   // Razorpay tracking
   razorpayOrderId: { type: String },
   razorpayPaymentId: { type: String },
 
-  // Final settlement amounts (set when bond is resolved)
+  // Final settlement amounts
   seekerPayout: { type: Number, default: 0 },   // What the worker receives
   providerPayout: { type: Number, default: 0 }  // What the company receives
 }, { timestamps: true });

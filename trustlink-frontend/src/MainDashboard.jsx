@@ -5,6 +5,7 @@ import ProfileSettings from './ProfileSettings';
 import SeekerDashboard from './components/SeekerDashboard';
 import ProviderDashboard from './components/ProviderDashboard';
 import HistoryDashboard from './components/HistoryDashboard';
+import AdminDashboard from './components/AdminDashboard';
 
 const MainDashboard = ({ role, isDarkMode, user, setUser, socket }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,35 +23,43 @@ const MainDashboard = ({ role, isDarkMode, user, setUser, socket }) => {
         </div>
         <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
           {user && <span style={{fontWeight: '700', fontSize: '0.9rem', opacity: 0.8}}>{user.profile?.fullName || user.email}</span>}
-          <span className="role-badge" style={{ background: role === 'seeker' ? 'var(--accent-blue)' : 'var(--success)', color: '#fff' }}>
+          <span className="role-badge" style={{ background: role === 'seeker' ? 'var(--accent-blue)' : role === 'provider' ? 'var(--success)' : '#c084fc', color: '#fff' }}>
             {role + ' dashboard'}
           </span>
         </div>
       </header>
       
-      <div style={{display: 'flex', gap: '12px', marginBottom: '30px', justifyContent: 'center', flexWrap: 'wrap'}}>
-        <button 
-          className={`action-btn ${activeTab === 'dashboard' ? '' : 'secondary-btn'}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          🏠 My Dashboard
-        </button>
-        <button 
-          className={`action-btn ${activeTab === 'history' ? '' : 'secondary-btn'}`}
-          onClick={() => setActiveTab('history')}
-        >
-          📋 Work History
-        </button>
-        <button 
-          className={`action-btn ${activeTab === 'profile' ? '' : 'secondary-btn'}`}
-          onClick={() => setActiveTab('profile')}
-        >
-          ⚙️ Manage Profile
-        </button>
-      </div>
+      {role !== 'admin' && (
+        <div style={{display: 'flex', gap: '12px', marginBottom: '30px', justifyContent: 'center', flexWrap: 'wrap'}}>
+          <button 
+            className={`action-btn ${activeTab === 'dashboard' ? '' : 'secondary-btn'}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            🏠 My Dashboard
+          </button>
+          <button 
+            className={`action-btn ${activeTab === 'history' ? '' : 'secondary-btn'}`}
+            onClick={() => setActiveTab('history')}
+          >
+            📋 Work History
+          </button>
+          <button 
+            className={`action-btn ${activeTab === 'profile' ? '' : 'secondary-btn'}`}
+            onClick={() => setActiveTab('profile')}
+          >
+            ⚙️ Manage Profile
+          </button>
+        </div>
+      )}
 
       {activeTab === 'dashboard' && (
-        role === 'seeker' ? <SeekerDashboard user={user} socket={socket} /> : <ProviderDashboard user={user} socket={socket} />
+        role === 'admin' ? (
+          <AdminDashboard user={user} socket={socket} />
+        ) : role === 'seeker' ? (
+          <SeekerDashboard user={user} socket={socket} />
+        ) : (
+          <ProviderDashboard user={user} socket={socket} />
+        )
       )}
       {activeTab === 'history' && (
         <HistoryDashboard user={user} role={role} />

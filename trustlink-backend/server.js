@@ -74,6 +74,7 @@ const applicationRoutes = require('./routes/applications');
 const bondRoutes = require('./routes/bonds');
 const reviewRoutes = require('./routes/reviews');
 const attendanceRoutes = require('./routes/attendance');
+const adminRoutes = require('./routes/admin');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
@@ -81,6 +82,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/bonds', bondRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`🚀 TrustLink Server & Sockets live on Port ${PORT}`));

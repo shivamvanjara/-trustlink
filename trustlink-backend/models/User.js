@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
-  role: { type: String, required: true, enum: ['seeker', 'provider'] },
+  role: { type: String, required: true, enum: ['seeker', 'provider', 'admin'] },
   
   // Profile expansions
   profile: {
@@ -15,9 +15,10 @@ const userSchema = new mongoose.Schema({
     skills: [{ type: String }],
     experienceYears: { type: Number, default: 0 },
     
-    // For Providers
+    // For Providers & Admin Organizations
     companyName: { type: String },
-    companyAddress: { type: String }
+    companyAddress: { type: String },
+    orgRole: { type: String, default: 'Protocol Administrator' }
   },
   trustScore: { type: Number, default: 50 },
   otp: { type: String, default: null },

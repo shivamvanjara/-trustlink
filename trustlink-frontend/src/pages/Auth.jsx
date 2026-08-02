@@ -130,18 +130,27 @@ const Auth = ({ user, setUser, role, setRole }) => {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Secure Native Labor Protocols</p>
         </div>
 
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '5px', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '5px', marginBottom: '30px' }}>
           <button 
+            type="button"
             onClick={() => setRole('seeker')} 
-            style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: role === 'seeker' ? 'var(--accent-blue)' : 'transparent', color: role === 'seeker' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}
+            style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', background: role === 'seeker' ? 'var(--accent-blue)' : 'transparent', color: role === 'seeker' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', transition: '0.3s' }}
           >
             Seeker
           </button>
           <button 
+            type="button"
             onClick={() => setRole('provider')} 
-            style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: role === 'provider' ? 'var(--accent-blue)' : 'transparent', color: role === 'provider' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}
+            style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', background: role === 'provider' ? 'var(--accent-blue)' : 'transparent', color: role === 'provider' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', transition: '0.3s' }}
           >
             Provider
+          </button>
+          <button 
+            type="button"
+            onClick={() => setRole('admin')} 
+            style={{ flex: 1, padding: '10px', borderRadius: '12px', border: 'none', background: role === 'admin' ? 'var(--accent-blue)' : 'transparent', color: role === 'admin' ? '#fff' : 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', transition: '0.3s' }}
+          >
+            Admin / Org
           </button>
         </div>
 
