@@ -27,7 +27,12 @@ const Auth = ({ user, setUser, role, setRole }) => {
       toast.success(res.data.message);
       setIsSignup(false);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Signup Failed");
+      console.error("Signup Error Details:", err);
+      const errorMsg = err.response?.data?.message || 
+        (err.message === "Network Error" || !err.response 
+          ? "Network Error: Cannot reach Backend URL. Check VITE_API_BASE_URL setting in Vercel!" 
+          : err.message || "Signup Failed");
+      toast.error(errorMsg, { duration: 6000 });
     } finally {
       setLoading(false);
     }
@@ -37,14 +42,20 @@ const Auth = ({ user, setUser, role, setRole }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/auth/login-step1`, {
+      const res = await axios.post(`${API_BASE_URL}/auth/login-step1`, {
         email: formData.email,
         password: formData.password,
         role: role
       });
+      toast.success(res.data?.message || "Credentials Correct!");
       setStep(2);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login Failed");
+      console.error("Login Step 1 Error Details:", err);
+      const errorMsg = err.response?.data?.message || 
+        (err.message === "Network Error" || !err.response 
+          ? "Network Error: Cannot reach Backend URL. Check VITE_API_BASE_URL setting in Vercel!" 
+          : err.message || "Login Failed");
+      toast.error(errorMsg, { duration: 6000 });
     } finally {
       setLoading(false);
     }
