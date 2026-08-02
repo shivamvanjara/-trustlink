@@ -18,15 +18,21 @@ const Auth = ({ user, setUser, role, setRole }) => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const slowNotice = setTimeout(() => {
+      toast("Waking up backend server (Render free tier), please wait...", { icon: "⏳", duration: 5000 });
+    }, 4000);
+
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/signup`, {
         email: formData.email,
         password: formData.password,
         role: role
       });
+      clearTimeout(slowNotice);
       toast.success(res.data.message);
       setIsSignup(false);
     } catch (err) {
+      clearTimeout(slowNotice);
       console.error("Signup Error Details:", err);
       const errorMsg = err.response?.data?.message || 
         (err.message === "Network Error" || !err.response 
@@ -34,6 +40,7 @@ const Auth = ({ user, setUser, role, setRole }) => {
           : err.message || "Signup Failed");
       toast.error(errorMsg, { duration: 6000 });
     } finally {
+      clearTimeout(slowNotice);
       setLoading(false);
     }
   };
@@ -41,15 +48,21 @@ const Auth = ({ user, setUser, role, setRole }) => {
   const handleLogin1 = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const slowNotice = setTimeout(() => {
+      toast("Waking up backend server (Render free tier), please wait...", { icon: "⏳", duration: 5000 });
+    }, 4000);
+
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login-step1`, {
         email: formData.email,
         password: formData.password,
         role: role
       });
+      clearTimeout(slowNotice);
       toast.success(res.data?.message || "Credentials Correct!");
       setStep(2);
     } catch (err) {
+      clearTimeout(slowNotice);
       console.error("Login Step 1 Error Details:", err);
       const errorMsg = err.response?.data?.message || 
         (err.message === "Network Error" || !err.response 
@@ -57,6 +70,7 @@ const Auth = ({ user, setUser, role, setRole }) => {
           : err.message || "Login Failed");
       toast.error(errorMsg, { duration: 6000 });
     } finally {
+      clearTimeout(slowNotice);
       setLoading(false);
     }
   };
