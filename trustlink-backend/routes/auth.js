@@ -64,11 +64,10 @@ router.post('/login-step1', async (req, res) => {
       console.error(`⚠️ Gmail SMTP notice for ${normalizedEmail}:`, emailErr.message);
     });
 
-    console.log(`🔑 Verification Code for ${normalizedEmail}: ${otp}`);
+    console.log(`🔑 Verification Code generated for ${normalizedEmail}`);
     res.status(200).json({ 
-      message: "Credentials Verified!", 
-      userId: user._id,
-      otp: otp
+      message: "Credentials Verified! 6-digit OTP code sent to your email address.", 
+      userId: user._id
     });
   } catch (err) {
     console.error("Login Step 1 Error:", err);
