@@ -1,5 +1,6 @@
 {
-  "buildCommand": "cd trustlink-frontend && npm install && npm run build",
+  "installCommand": "cd trustlink-frontend && npm install --legacy-peer-deps",
+  "buildCommand": "cd trustlink-frontend && npm run build",
   "outputDirectory": "trustlink-frontend/dist",
   "rewrites": [
     {
