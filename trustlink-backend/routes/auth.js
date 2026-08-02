@@ -38,29 +38,31 @@ router.post('/login-step1', async (req, res) => {
   const normalizedEmail = email.trim().toLowerCase();
 
   try {
-    const user = await User.findOne({ 
-      email: normalizedEmail, 
-      password: password, 
-      role: role 
-    });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid Email, Password, or Role" });
+      return res.status(401).json({ message: "Account not found for this email" });
+    }
+
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Store OTP in MongoDB with 30-minute expiration window
-    user.otp = otp;
-    user.otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
-    await user.save();
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 mins
 
-    // Await email dispatch via Nodemailer
+    // Atomically update OTP in MongoDB
+    await User.updateOne(
+      { _id: user._id }, 
+      { $set: { otp: otp, otpExpiresAt: expiresAt } }
+    );
+
+    // Send email via Nodemailer
     try {
       await sendOTP(normalizedEmail, otp);
-      console.log(`✉️ OTP ${otp} delivered via email to ${normalizedEmail}`);
+      console.log(`✉️ OTP ${otp} sent to ${normalizedEmail}`);
     } catch (emailErr) {
-      console.error(`⚠️ Email dispatch notice for ${normalizedEmail}:`, emailErr.message);
+      console.error(`⚠️ Email send error for ${normalizedEmail}:`, emailErr.message);
     }
 
     res.status(200).json({ 
@@ -69,39 +71,50 @@ router.post('/login-step1', async (req, res) => {
     });
   } catch (err) {
     console.error("Login Step 1 Error:", err);
-    res.status(500).json({ message: "Error sending OTP email: " + err.message });
+    res.status(500).json({ message: "Error during login: " + err.message });
   }
 });
 
 router.post('/login-step2', async (req, res) => {
   const { email, otp } = req.body;
-  const normalizedEmail = email ? email.trim().toLowerCase() : '';
-  const cleanOtp = otp ? otp.toString().trim() : '';
+  if (!email || !otp) {
+    return res.status(400).json({ message: "Email and OTP code are required" });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const cleanOtp = otp.toString().trim();
 
   try {
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User account not found" });
     }
 
-    console.log(`🔍 Verifying OTP for ${normalizedEmail}. Input: "${cleanOtp}", DB Stored: "${user.otp}"`);
-
-    const isOtpValid = user.otp && (user.otp.toString().trim() === cleanOtp);
-    const isNotExpired = !user.otpExpiresAt || (new Date(user.otpExpiresAt).getTime() > Date.now());
-
-    if (isOtpValid && isNotExpired) {
-      user.otp = null;
-      user.otpExpiresAt = null;
-      await user.save();
-      console.log(`✅ OTP Verified successfully for ${normalizedEmail}`);
-      return res.status(200).json({ message: "Login Successful", user });
-    } else {
-      console.log(`❌ OTP Failed for ${normalizedEmail}. Valid: ${isOtpValid}, NotExpired: ${isNotExpired}`);
-      return res.status(400).json({ message: "Invalid OTP code. Please check your email code and try again." });
+    if (!user.otp) {
+      return res.status(400).json({ message: "No active OTP found. Please request a new code." });
     }
+
+    const dbOtp = user.otp.toString().trim();
+    if (dbOtp !== cleanOtp) {
+      console.log(`❌ OTP Mismatch for ${normalizedEmail}: Input="${cleanOtp}", DB="${dbOtp}"`);
+      return res.status(400).json({ message: "Incorrect OTP code. Please check your email code." });
+    }
+
+    if (user.otpExpiresAt && new Date(user.otpExpiresAt).getTime() < Date.now()) {
+      return res.status(400).json({ message: "OTP has expired. Please click back and request a new code." });
+    }
+
+    // Atomically clear OTP after successful login
+    await User.updateOne(
+      { _id: user._id }, 
+      { $set: { otp: null, otpExpiresAt: null } }
+    );
+
+    console.log(`✅ User ${normalizedEmail} successfully authenticated!`);
+    return res.status(200).json({ message: "Login Successful", user });
   } catch (err) {
     console.error("Login Step 2 Error:", err);
-    res.status(500).json({ message: "Error verifying OTP" });
+    return res.status(500).json({ message: "Error verifying OTP" });
   }
 });
 
