@@ -184,9 +184,14 @@ const Auth = ({ user, setUser, role, setRole }) => {
               key="otp-form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               onSubmit={handleLogin2}
             >
-              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <h3 style={{ margin: '0 0 10px' }}>Security Verification</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Enter the 6-digit code sent to your email.</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>Enter the 6-digit code sent to your email.</p>
+                {formData.otp && (
+                  <div style={{ background: 'rgba(37, 99, 235, 0.15)', border: '1px solid #3b82f6', borderRadius: '12px', padding: '12px', fontSize: '0.9rem', color: '#93c5fd' }}>
+                    🔑 Verification Code: <strong style={{ fontSize: '1.1rem', letterSpacing: '3px', color: '#ffffff' }}>{formData.otp}</strong>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '30px' }}>
