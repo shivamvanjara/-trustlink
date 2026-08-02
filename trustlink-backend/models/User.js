@@ -19,7 +19,9 @@ const userSchema = new mongoose.Schema({
     companyName: { type: String },
     companyAddress: { type: String }
   },
-  trustScore: { type: Number, default: 50 }
+  trustScore: { type: Number, default: 50 },
+  otp: { type: String, default: null },
+  otpExpiresAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

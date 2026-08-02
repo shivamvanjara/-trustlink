@@ -49,9 +49,13 @@ router.post('/login-step1', async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[normalizedEmail] = otp;
+    
+    // Store OTP in MongoDB with 15-minute expiration
+    user.otp = otp;
+    user.otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    await user.save();
 
-    // Trigger email dispatch in background without blocking API response speed
+    // Trigger email dispatch in background
     sendOTP(normalizedEmail, otp).then(() => {
       console.log(`✉️ OTP ${otp} delivered to ${normalizedEmail}`);
     }).catch((emailErr) => {
@@ -73,13 +77,28 @@ router.post('/login-step1', async (req, res) => {
 router.post('/login-step2', async (req, res) => {
   const { email, otp } = req.body;
   const normalizedEmail = email ? email.trim().toLowerCase() : '';
+  const cleanOtp = otp ? otp.toString().trim() : '';
 
-  if (otpStore[normalizedEmail] && otpStore[normalizedEmail] === otp.trim()) {
-    delete otpStore[normalizedEmail];
+  try {
     const user = await User.findOne({ email: normalizedEmail });
-    res.status(200).json({ message: "Login Successful", user });
-  } else {
-    res.status(400).json({ message: "Invalid or Expired OTP" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isOtpValid = user.otp && user.otp === cleanOtp;
+    const isNotExpired = user.otpExpiresAt && new Date(user.otpExpiresAt) > new Date();
+
+    if (isOtpValid && isNotExpired) {
+      user.otp = null;
+      user.otpExpiresAt = null;
+      await user.save();
+      res.status(200).json({ message: "Login Successful", user });
+    } else {
+      res.status(400).json({ message: "Invalid or Expired OTP. Please login again." });
+    }
+  } catch (err) {
+    console.error("Login Step 2 Error:", err);
+    res.status(500).json({ message: "Error verifying OTP" });
   }
 });
 
