@@ -148,9 +148,10 @@ router.post('/resolve', async (req, res) => {
     bond.status = newBondStatus;
     bond.seekerPayout = seekerPayout;
     bond.providerPayout = providerPayout;
+    const targetAppStatus = newBondStatus === 'COMPLETED' ? 'COMPLETED' : 'CANCELLED';
     const [updatedBond, updatedApp] = await Promise.all([
       bond.save(),
-      Application.findByIdAndUpdate(applicationId, { status: 'CANCELLED' }, { new: true })
+      Application.findByIdAndUpdate(applicationId, { status: targetAppStatus }, { new: true })
     ]);
 
     // Emit to both parties
@@ -171,8 +172,6 @@ router.post('/resolve', async (req, res) => {
   }
 });
 
-
-
 // Process Seeker Escrow Token Payment
 router.post('/seeker-pay', async (req, res) => {
   try {
@@ -188,11 +187,22 @@ router.post('/seeker-pay', async (req, res) => {
     // Advance Application explicitly
     const updatedApp = await Application.findByIdAndUpdate(bond.applicationId, { status: 'HIRED' }, { new: true });
 
-    // Auto Cancel all other pending applications securely
+    // Find and Auto Cancel all other pending applications securely
+    const otherApps = await Application.find({ 
+      seekerId: bond.seekerId, 
+      _id: { $ne: bond.applicationId }, 
+      status: { $in: ['APPLIED', 'INTERVIEW_INVITED', 'TRIAL_STARTED', 'BOND_PENDING'] } 
+    });
+
     await Application.updateMany(
-      { seekerId: bond.seekerId, _id: { $ne: bond.applicationId }, status: { $in: ['APPLIED', 'INTERVIEW_INVITED', 'TRIAL_STARTED', 'BOND_PENDING'] } },
+      { _id: { $in: otherApps.map(a => a._id) } },
       { $set: { status: 'CANCELLED' } }
     );
+
+    // Notify each affected provider of auto-cancellation
+    otherApps.forEach(app => {
+      req.io.to(app.providerId.toString()).emit('APPLICATION_UPDATED', { ...app.toObject(), status: 'CANCELLED' });
+    });
 
     req.io.to(bond.providerId.toString()).emit('BOND_UPDATED', bond);
     req.io.to(bond.seekerId.toString()).emit('APPLICATION_UPDATED', updatedApp);

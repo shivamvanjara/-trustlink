@@ -19,14 +19,14 @@ router.get('/nearby', async (req, res) => {
     const { seekerId, city, skill } = req.query;
     let filter = { status: 'OPEN' };
 
-    // City filter: exact start-anchored, case-insensitive match
+    // City filter: case-insensitive partial match
     if (city && city.trim()) {
-      filter.city = { $regex: `^${city.trim()}$`, $options: 'i' };
+      filter.city = { $regex: city.trim(), $options: 'i' };
     } else if (seekerId) {
       const User = require('../models/User');
       const seeker = await User.findById(seekerId).select('profile.city');
       if (seeker?.profile?.city?.trim()) {
-        filter.city = { $regex: `^${seeker.profile.city.trim()}$`, $options: 'i' };
+        filter.city = { $regex: seeker.profile.city.trim(), $options: 'i' };
       }
     }
 

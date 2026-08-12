@@ -54,7 +54,7 @@ router.get('/provider/:providerId', async (req, res) => {
   try {
     const apps = await Application.find({ providerId: req.params.providerId })
       .populate('seekerId', 'profile email')
-      .populate('jobId', 'title category salary bondDurationMonths workersNeeded');
+      .populate('jobId', 'title category city salary bondDurationMonths workersNeeded location');
     res.json(apps);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -65,8 +65,8 @@ router.get('/provider/:providerId', async (req, res) => {
 router.get('/seeker/:seekerId', async (req, res) => {
   try {
     const apps = await Application.find({ seekerId: req.params.seekerId })
-      .populate('providerId', 'profile.companyName')
-      .populate('jobId', 'title category salary bondDurationMonths workersNeeded location');
+      .populate('providerId', 'profile.companyName email')
+      .populate('jobId', 'title category city salary bondDurationMonths workersNeeded location');
     res.json(apps);
   } catch (err) {
     res.status(500).json({ message: err.message });
