@@ -160,12 +160,12 @@ const ProfileSettings = ({ user, setUser, role }) => {
       
       {/* Hero Header Banner */}
       <div 
-        className="card card-glow" 
+        className="card" 
         style={{ 
-          padding: '30px 35px', 
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.7))', 
-          borderRadius: '24px', 
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          padding: '28px 32px', 
+          background: '#0f172a', 
+          borderRadius: '16px', 
+          border: '1px solid #1e293b',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -173,34 +173,30 @@ const ProfileSettings = ({ user, setUser, role }) => {
           gap: '20px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div style={{ 
-            width: '72px', 
-            height: '72px', 
-            borderRadius: '22px', 
-            background: role === 'seeker' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : role === 'provider' ? 'linear-gradient(135deg, #059669, #10b981)' : 'linear-gradient(135deg, #7c3aed, #a855f7)',
+            width: '60px', 
+            height: '60px', 
+            borderRadius: '14px', 
+            background: '#1e293b',
+            border: '1px solid #334155',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 25px rgba(99, 102, 241, 0.3)'
+            justifyContent: 'center'
           }}>
-            {role === 'seeker' ? <User size={36} color="#fff" /> : <Building2 size={36} color="#fff" />}
+            {role === 'seeker' ? <User size={30} color="#f8fafc" /> : <Building2 size={30} color="#f8fafc" />}
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <h2 style={{ fontFamily: 'Outfit', fontSize: '1.8rem', fontWeight: '800', margin: 0, color: '#f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: '700', margin: 0, color: '#f8fafc' }}>
                 {displayName}
               </h2>
-              <span className="role-badge" style={{ background: role === 'seeker' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : 'linear-gradient(135deg, #059669, #10b981)', color: '#fff' }}>
+              <span style={{ background: '#1e293b', color: '#f8fafc', border: '1px solid #334155', padding: '4px 12px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: '700', textTransform: 'uppercase' }}>
                 {role}
               </span>
             </div>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{user?.email}</span>
-              <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#64748b' }}></span>
-              <span style={{ color: '#38bdf8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <CheckCircle2 size={14} /> Identity Verified
-              </span>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck size={16} color="#10b981" /> {user?.email} • Protocol Verified
             </p>
           </div>
         </div>

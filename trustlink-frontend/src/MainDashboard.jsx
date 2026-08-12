@@ -17,20 +17,8 @@ const MainDashboard = ({ role, isDarkMode, user, setUser, socket }) => {
       {/* Ultra-Premium Glass Navigation Header */}
       <header className="dashboard-header">
         <div style={{ display: 'flex', gap: '35px', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ 
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.25))', 
-              border: '1px solid rgba(16, 185, 129, 0.4)', 
-              padding: '10px', 
-              borderRadius: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 22px rgba(16, 185, 129, 0.35)'
-            }}>
-              <ShieldCheck size={26} color="#34d399"/>
-            </div>
-            <h2 style={{ margin: 0 }}>TrustLink</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 style={{ margin: 0, fontSize: '1.55rem', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.03em' }}>TrustLink</h2>
           </div>
 
           <div className="header-links" style={{ display: 'flex', gap: '22px', fontSize: '0.88rem', fontWeight: '600' }}>
@@ -42,18 +30,25 @@ const MainDashboard = ({ role, isDarkMode, user, setUser, socket }) => {
 
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.03)', padding: '6px 14px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block', boxShadow: '0 0 10px #10b981' }}></span>
-              <span style={{ fontWeight: '700', fontSize: '0.88rem', color: '#f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#1e293b', padding: '6px 14px', borderRadius: '10px', border: '1px solid #334155' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+              <span style={{ fontWeight: '600', fontSize: '0.88rem', color: '#f8fafc' }}>
                 {user.profile?.fullName || user.profile?.companyName || user.email}
               </span>
             </div>
           )}
-          <span className="role-badge" style={{ 
-            background: role === 'seeker' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : role === 'provider' ? 'linear-gradient(135deg, #059669, #10b981)' : 'linear-gradient(135deg, #7c3aed, #a855f7)', 
-            color: '#fff' 
+          <span style={{ 
+            background: '#1e293b', 
+            color: '#f8fafc',
+            border: '1px solid #334155',
+            borderRadius: '10px',
+            padding: '5px 14px',
+            fontSize: '0.78rem',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em'
           }}>
-            {role} protocol
+            {role}
           </span>
         </div>
       </header>
