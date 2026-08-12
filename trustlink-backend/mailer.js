@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const dns = require('dns');
 require('dotenv').config();
 
-// Force Node.js default DNS order to IPv4
+// Enforce IPv4 priority for DNS lookups to prevent IPv6 ENETUNREACH errors
 try {
   if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
@@ -11,23 +11,29 @@ try {
   // Ignore
 }
 
-/**
- * Resolve 'smtp.gmail.com' explicitly to an IPv4 address (A-record)
- * This guarantees Node.js connects directly via IPv4 TCP socket,
- * completely preventing Windows/ISP ENETUNREACH IPv6 (2607:f8b0...) errors.
- */
-const getGmailIPv4Host = async () => {
-  return new Promise((resolve) => {
-    dns.resolve4('smtp.gmail.com', (err, addresses) => {
-      if (!err && addresses && addresses.length > 0) {
-        console.log(`🌐 Resolved Gmail SMTP IPv4: ${addresses[0]}`);
-        resolve(addresses[0]);
-      } else {
-        resolve('smtp.gmail.com');
-      }
-    });
-  });
-};
+// Create robust Gmail service transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 25000
+});
+
+// Diagnostic check on startup
+transporter.verify((error) => {
+  if (error) {
+    console.warn("⚠️ Gmail Transporter Warning:", error.message);
+  } else {
+    console.log("⚡ Gmail SMTP Transporter Ready");
+  }
+});
 
 /**
  * Function to send OTP via Email
@@ -62,59 +68,13 @@ const sendOTP = async (email, otp) => {
     `
   };
 
-  // 1. Resolve to literal IPv4 IP address
-  const targetHost = await getGmailIPv4Host();
-
-  // 2. Create transport targeting literal IPv4 address with TLS SNI servername
-  const transporter = nodemailer.createTransport({
-    host: targetHost,
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    family: 4,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-    tls: {
-      servername: 'smtp.gmail.com', // SNI hostname matching SSL certificate
-      rejectUnauthorized: false
-    },
-    connectionTimeout: 12000,
-    greetingTimeout: 12000,
-    socketTimeout: 15000
-  });
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`✉️ SUCCESS [IPv4 ${targetHost}:587]: OTP [${otp}] delivered to ${email}`);
-    return info;
-  } catch (err) {
-    console.warn(`⚠️ IPv4 direct host (${targetHost}) failed: ${err.message}. Retrying via service transport...`);
-    
-    // Fallback using Nodemailer's built-in 'gmail' service configuration
-    const serviceTransporter = nodemailer.createTransport({
-      service: 'gmail',
-      family: 4,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      tls: {
-        rejectUnauthorized: false
-      },
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000
-    });
-
-    const serviceInfo = await serviceTransporter.sendMail(mailOptions);
-    console.log(`✉️ SUCCESS [Gmail Service Fallback]: OTP [${otp}] delivered to ${email}`);
-    return serviceInfo;
-  }
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`✉️ SUCCESS: OTP [${otp}] delivered to ${email} (MessageId: ${info.messageId})`);
+  return info;
 };
 
 module.exports = sendOTP;
+
 
 
 

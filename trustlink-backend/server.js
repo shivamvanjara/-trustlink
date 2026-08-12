@@ -4,14 +4,13 @@ const cors = require('cors');
 const dns = require('dns');
 require('dotenv').config();
 
-// Force Node.js DNS resolver to prioritize IPv4 over IPv6 to prevent ENETUNREACH IPv6 errors
+// Enforce IPv4 priority for system DNS lookups across all backend modules
 try {
   if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
   }
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
 } catch (e) {
-  // Ignore DNS override errors
+  // Ignore
 }
 
 const app = express();
