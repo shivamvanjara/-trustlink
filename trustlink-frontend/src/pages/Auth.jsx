@@ -53,21 +53,21 @@ const Auth = ({ user, setUser, role, setRole }) => {
   };
 
   return (
-    <div className="auth-wrapper" style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.15), transparent 70%), #030712', padding: '20px' }}>
+    <div className="auth-wrapper" style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.15), transparent 70%), #060a12', padding: '20px' }}>
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="card-glow"
-        style={{ width: '100%', maxWidth: '460px', background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '28px', padding: '45px', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}
+        style={{ width: '100%', maxWidth: '460px', background: 'rgba(13, 20, 36, 0.85)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '28px', padding: '45px', boxShadow: '0 25px 60px rgba(0,0,0,0.65)' }}
       >
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '35px' }}>
-          <div style={{ display: 'inline-flex', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2))', border: '1px solid rgba(99, 102, 241, 0.4)', padding: '16px', borderRadius: '22px', marginBottom: '18px', boxShadow: '0 0 30px rgba(99, 102, 241, 0.3)' }}>
-            <ShieldCheck size={38} color="#818cf8"/>
+          <div style={{ display: 'inline-flex', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '16px', borderRadius: '22px', marginBottom: '18px', boxShadow: '0 0 30px rgba(16, 185, 129, 0.35)' }}>
+            <ShieldCheck size={38} color="#34d399"/>
           </div>
-          <h1 style={{ fontFamily: 'Outfit', fontSize: '2.6rem', fontWeight: '800', margin: '0 0 6px', letterSpacing: '-0.04em', background: 'linear-gradient(to right, #ffffff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h1 style={{ fontFamily: 'Outfit', fontSize: '2.6rem', fontWeight: '800', margin: '0 0 6px', letterSpacing: '-0.04em', background: 'linear-gradient(to right, #ffffff, #a7f3d0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             TrustLink
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0, fontWeight: '500' }}>

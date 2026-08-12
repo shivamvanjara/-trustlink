@@ -19,16 +19,16 @@ const MainDashboard = ({ role, isDarkMode, user, setUser, socket }) => {
         <div style={{ display: 'flex', gap: '35px', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ 
-              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25))', 
-              border: '1px solid rgba(99, 102, 241, 0.4)', 
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.25))', 
+              border: '1px solid rgba(16, 185, 129, 0.4)', 
               padding: '10px', 
               borderRadius: '16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)'
+              boxShadow: '0 0 22px rgba(16, 185, 129, 0.35)'
             }}>
-              <ShieldCheck size={26} color="#818cf8"/>
+              <ShieldCheck size={26} color="#34d399"/>
             </div>
             <h2 style={{ margin: 0 }}>TrustLink</h2>
           </div>
