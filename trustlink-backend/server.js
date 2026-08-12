@@ -58,6 +58,17 @@ io.on('connection', (socket) => {
     console.log(`User ${userId} joined room`);
   });
 
+  // Live Chat Room Handlers
+  socket.on('join_room', (roomName) => {
+    socket.join(roomName);
+    console.log(`💬 Socket ${socket.id} joined chat room: ${roomName}`);
+  });
+
+  socket.on('send_message', (data) => {
+    console.log(`✉️ Chat message in room [${data.room}]: ${data.sender} -> ${data.text}`);
+    socket.to(data.room).emit('receive_message', data);
+  });
+
   socket.on('disconnect', () => {
     console.log('Socket disconnected:', socket.id);
   });
