@@ -4,11 +4,14 @@ const cors = require('cors');
 const dns = require('dns');
 require('dotenv').config();
 
-// Workaround for Windows local DNS SRV resolution issues with MongoDB Atlas
+// Force Node.js DNS resolver to prioritize IPv4 over IPv6 to prevent ENETUNREACH IPv6 errors
 try {
+  if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+  }
   dns.setServers(['8.8.8.8', '1.1.1.1']);
 } catch (e) {
-  // Ignore DNS override errors in environments where not supported
+  // Ignore DNS override errors
 }
 
 const app = express();

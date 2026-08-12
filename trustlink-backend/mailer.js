@@ -1,7 +1,18 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
 require('dotenv').config();
 
-// Primary Transporter: Port 587 STARTTLS (fastest and bypasses ISP/Windows 465 blocks)
+// Force Node.js DNS resolution order to IPv4 first
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
+// Custom DNS lookup handler to guarantee IPv4 resolution (prevents ENETUNREACH 2607:f8b0... IPv6 errors)
+const ipv4Lookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { ...options, family: 4 }, callback);
+};
+
+// Primary Transporter: Port 587 STARTTLS (bypasses ISP/Windows blocks & forces IPv4)
 const primaryTransporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
@@ -10,6 +21,7 @@ const primaryTransporter = nodemailer.createTransport({
   pool: true,
   maxConnections: 5,
   family: 4, // Force IPv4
+  lookup: ipv4Lookup,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -22,14 +34,15 @@ const primaryTransporter = nodemailer.createTransport({
   socketTimeout: 15000
 });
 
-// Fallback Transporter: Port 465 SSL
+// Fallback Transporter: Port 465 SSL (forces IPv4)
 const fallbackTransporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   pool: true,
   maxConnections: 5,
-  family: 4,
+  family: 4, // Force IPv4
+  lookup: ipv4Lookup,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
