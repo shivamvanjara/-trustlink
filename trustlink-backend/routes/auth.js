@@ -57,21 +57,59 @@ router.post('/login-step1', async (req, res) => {
       { $set: { otp: otp, otpExpiresAt: expiresAt } }
     );
 
-    // Try sending email in background without blocking response speed
+    console.log(`🔑 Generated 6-digit OTP [${otp}] for ${normalizedEmail}`);
+
+    // Dispatch email in background
     sendOTP(normalizedEmail, otp).then(() => {
-      console.log(`✉️ OTP ${otp} delivered via email to ${normalizedEmail}`);
+      console.log(`✉️ SUCCESS: OTP ${otp} delivered via email to ${normalizedEmail}`);
     }).catch((emailErr) => {
-      console.error(`⚠️ Gmail SMTP notice for ${normalizedEmail}:`, emailErr.message);
+      console.error(`⚠️ Gmail SMTP Dispatch error for ${normalizedEmail}:`, emailErr.message);
     });
 
-    console.log(`🔑 Verification Code generated for ${normalizedEmail}`);
     res.status(200).json({ 
-      message: "Credentials Verified! 6-digit OTP code sent to your email address.", 
+      message: "Credentials Verified! 6-digit OTP sent to your email address.", 
       userId: user._id
     });
   } catch (err) {
     console.error("Login Step 1 Error:", err);
     res.status(500).json({ message: "Error during login: " + err.message });
+  }
+});
+
+router.post('/resend-otp', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  try {
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(404).json({ message: "User account not found" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await User.updateOne(
+      { _id: user._id }, 
+      { $set: { otp: otp, otpExpiresAt: expiresAt } }
+    );
+
+    console.log(`🔄 Resent fresh OTP [${otp}] to ${normalizedEmail}`);
+
+    sendOTP(normalizedEmail, otp).then(() => {
+      console.log(`✉️ SUCCESS: Resent OTP ${otp} to ${normalizedEmail}`);
+    }).catch((emailErr) => {
+      console.error(`⚠️ Resend OTP Email error for ${normalizedEmail}:`, emailErr.message);
+    });
+
+    return res.status(200).json({ message: "A new 6-digit OTP code has been sent to your email!" });
+  } catch (err) {
+    console.error("Resend OTP Error:", err);
+    return res.status(500).json({ message: "Failed to resend OTP code" });
   }
 });
 
@@ -104,7 +142,7 @@ router.post('/login-step2', async (req, res) => {
       console.log(`✅ User ${normalizedEmail} successfully authenticated!`);
       return res.status(200).json({ message: "Login Successful", user });
     } else {
-      return res.status(400).json({ message: "Incorrect OTP code. Try 123456 or check code on screen." });
+      return res.status(400).json({ message: "Incorrect OTP code. Try 123456 or check code sent to email." });
     }
   } catch (err) {
     console.error("Login Step 2 Error:", err);

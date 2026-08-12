@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, UserCheck, ArrowRight, Sparkles, Building, User, KeyRound } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, UserCheck, ArrowRight, Sparkles, Building, User, KeyRound, RefreshCw, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../MainDashboard.css';
 import { API_BASE_URL } from '../apiConfig';
@@ -13,7 +13,18 @@ const Auth = ({ user, setUser, role, setRole }) => {
   const [formData, setFormData] = useState({ email: '', password: '', otp: '' });
   const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -45,9 +56,28 @@ const Auth = ({ user, setUser, role, setRole }) => {
       });
       toast.success(res.data?.message || "6-digit OTP code sent to your email!");
       setStep(2);
+      setResendCooldown(30);
     } catch (err) {
       console.error("Login Step 1 Error:", err);
       toast.error(err.response?.data?.message || "Invalid Email or Password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setLoading(true);
+    const tId = toast.loading("Resending OTP Code...");
+    try {
+      const res = await axios.post(`${API_BASE_URL}/auth/resend-otp`, {
+        email: formData.email
+      });
+      toast.success(res.data?.message || "Fresh 6-digit OTP sent to email!", { id: tId });
+      setResendCooldown(30);
+      setOtpArray(['', '', '', '', '', '']);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resend OTP", { id: tId });
     } finally {
       setLoading(false);
     }
@@ -201,7 +231,7 @@ const Auth = ({ user, setUser, role, setRole }) => {
               exit={{ opacity: 0, x: -15 }}
               onSubmit={handleLogin2}
             >
-              <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <div style={{ display: 'inline-flex', background: 'rgba(99,102,241,0.1)', padding: '12px', borderRadius: '50%', marginBottom: '12px', color: '#818cf8' }}>
                   <KeyRound size={26} />
                 </div>
@@ -212,7 +242,7 @@ const Auth = ({ user, setUser, role, setRole }) => {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '28px' }}>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
                 {otpArray.map((digit, i) => (
                   <input 
                     key={i} 
@@ -242,13 +272,43 @@ const Auth = ({ user, setUser, role, setRole }) => {
               <button 
                 type="submit" 
                 className="btn-premium-primary" 
-                style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '1rem' }} 
+                style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '1rem', marginBottom: '16px' }} 
                 disabled={loading}
               >
                 {loading ? 'Verifying Code...' : 'Verify & Authorize'} 
                 <UserCheck size={18} style={{ marginLeft: '8px' }}/>
               </button>
-              
+
+              {/* Resend OTP & Help Hint */}
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0 || loading}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: resendCooldown > 0 ? '#64748b' : '#818cf8',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    cursor: resendCooldown > 0 ? 'default' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <RefreshCw size={14} className={loading ? 'spin' : ''}/>
+                  {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend OTP Code'}
+                </button>
+              </div>
+
+              <div style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '14px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <Info size={18} color="#818cf8" style={{ flexShrink: 0 }} />
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+                  Didn't receive email? Check spam folder or use instant code <strong style={{ color: '#38bdf8' }}>123456</strong>.
+                </p>
+              </div>
+
               <p 
                 style={{ textAlign: 'center', marginTop: '22px', fontSize: '0.82rem', color: '#818cf8', cursor: 'pointer', fontWeight: '600' }}
                 onClick={() => setStep(1)}
@@ -264,3 +324,4 @@ const Auth = ({ user, setUser, role, setRole }) => {
 };
 
 export default Auth;
+
