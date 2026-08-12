@@ -1,15 +1,15 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// 1. Create high-performance SMTP Transporter for Gmail
-const transporter = nodemailer.createTransport({
+// Primary Transporter: Port 587 STARTTLS (fastest and bypasses ISP/Windows 465 blocks)
+const primaryTransporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // TLS
-  pool: true,   // Keep SMTP socket pool alive for immediate email delivery
-  maxConnections: 10,
-  maxMessages: Infinity,
-  family: 4,    // Force IPv4 to bypass Windows IPv6 DNS delays
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  pool: true,
+  maxConnections: 5,
+  family: 4, // Force IPv4
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -17,22 +17,42 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 20000
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000
 });
 
-// Pre-warm & verify connection pool on server load
-transporter.verify((error) => {
+// Fallback Transporter: Port 465 SSL
+const fallbackTransporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  pool: true,
+  maxConnections: 5,
+  family: 4,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000
+});
+
+// Verify primary connection pool on server startup
+primaryTransporter.verify((error) => {
   if (error) {
-    console.error("❌ Nodemailer Transport Initialization Error:", error.message);
+    console.warn("⚠️ Primary SMTP (587) Notice:", error.message);
   } else {
-    console.log("⚡ Nodemailer SMTP Pool Verified & Ready (smtp.gmail.com:465)");
+    console.log("⚡ Primary SMTP Pool Ready (smtp.gmail.com:587 STARTTLS)");
   }
 });
 
 /**
- * Function to send OTP via Email (Awaited for 100% guaranteed delivery)
+ * Function to send OTP via Email with dual-port fallback
  * @param {string} email - Recipient email address
  * @param {string} otp - 6-digit verification code
  */
@@ -64,10 +84,20 @@ const sendOTP = async (email, otp) => {
     `
   };
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log(`✉️ SUCCESS: OTP [${otp}] delivered to ${email} (MessageId: ${info.messageId})`);
-  return info;
+  try {
+    // Try Port 587 STARTTLS first (Fastest & most reliable)
+    const info = await primaryTransporter.sendMail(mailOptions);
+    console.log(`✉️ SUCCESS [Port 587]: OTP [${otp}] delivered to ${email}`);
+    return info;
+  } catch (primaryErr) {
+    console.warn(`⚠️ Primary SMTP (587) failed: ${primaryErr.message}. Retrying via Fallback SMTP (465)...`);
+    // Fallback to Port 465 SSL
+    const fallbackInfo = await fallbackTransporter.sendMail(mailOptions);
+    console.log(`✉️ SUCCESS [Port 465 Fallback]: OTP [${otp}] delivered to ${email}`);
+    return fallbackInfo;
+  }
 };
 
 module.exports = sendOTP;
+
 
