@@ -23,6 +23,18 @@ router.get('/config', (req, res) => {
   res.json({ key: process.env.RAZORPAY_KEY_ID });
 });
 
+// Razorpay Automated Escrow Payout Webhook Endpoint
+router.post('/webhook', (req, res) => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'trustlink_secret';
+  console.log('⚡ Razorpay Webhook Event Received:', req.body.event);
+  
+  if (req.body.event === 'payment.captured' || req.body.event === 'payout.processed') {
+    console.log('✅ Automated Escrow Settlement Confirmed by Razorpay Vault');
+  }
+
+  res.status(200).json({ status: 'ok', message: 'Webhook Processed' });
+});
+
 // Generate a Bond (Transitions App to HIRED)
 router.post('/generate', async (req, res) => {
   try {

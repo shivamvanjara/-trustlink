@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Search, MapPin, Briefcase, Filter, Sparkles, DollarSign, CheckCircle2, Clock, ShieldCheck, AlertTriangle, ArrowUpRight, ChevronRight, Award } from 'lucide-react';
+import { Search, MapPin, Briefcase, Filter, Sparkles, DollarSign, CheckCircle2, Clock, ShieldCheck, AlertTriangle, ArrowUpRight, ChevronRight, Award, MessageSquare, FileText } from 'lucide-react';
 import { SKILLS_DATA } from '../utils/skillsList';
 import { API_BASE_URL } from '../apiConfig';
+import ChatModal from './ChatModal';
+import ContractModal from './ContractModal';
 
 const API_BASE = API_BASE_URL;
 
@@ -16,6 +18,9 @@ const SeekerDashboard = ({ user, socket }) => {
   const [activeTab, setActiveTab] = useState('find'); // 'find' | 'applications' | 'ledger'
   const [bonds, setBonds] = useState([]);
   const [cancelledJobIds, setCancelledJobIds] = useState(new Set());
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
 
   const isProfileComplete = () => {
     const p = user?.profile;
@@ -142,7 +147,36 @@ const SeekerDashboard = ({ user, socket }) => {
     } catch (err) { toast.error("Action failed"); }
   };
 
-  const visibleJobs = nearbyJobs.filter(job => !cancelledJobIds.has(job._id?.toString()));
+  // AI Matchmaking Algorithm Engine
+  const calculateAIMatch = (job) => {
+    const userSkills = user?.profile?.skills || [];
+    const userCity = (user?.profile?.city || '').toLowerCase();
+    const jobCity = (job?.city || '').toLowerCase();
+    const jobTitle = (job?.title || '').toLowerCase();
+    const jobSkill = (job?.requiredSkill || '').toLowerCase();
+
+    let score = 40; // Base market score
+
+    if (userCity && jobCity && (userCity.includes(jobCity) || jobCity.includes(userCity))) {
+      score += 30;
+    }
+
+    const hasSkillMatch = userSkills.some(s => {
+      const lowerS = s.toLowerCase();
+      return jobTitle.includes(lowerS) || jobSkill.includes(lowerS) || lowerS.includes(jobSkill);
+    });
+
+    if (hasSkillMatch) {
+      score += 28;
+    }
+
+    return Math.min(99, Math.max(48, score));
+  };
+
+  const visibleJobs = nearbyJobs
+    .filter(job => !cancelledJobIds.has(job._id?.toString()))
+    .map(job => ({ ...job, aiMatchScore: calculateAIMatch(job) }))
+    .sort((a, b) => b.aiMatchScore - a.aiMatchScore);
 
   // Financial Stats
   const totalPayoutRecv = bonds.reduce((sum, b) => sum + (b.seekerPayout || 0), 0);
@@ -247,8 +281,19 @@ const SeekerDashboard = ({ user, socket }) => {
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                         <h4 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'Outfit', color: '#ffffff' }}>{job.title}</h4>
-                        <span style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)', color: '#818cf8', fontSize: '0.75rem', padding: '3px 10px', borderRadius: '12px', fontWeight: '700' }}>
-                          VERIFIED PROTOCOL
+                        <span style={{ 
+                          background: job.aiMatchScore >= 80 ? 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(99,102,241,0.18))' : 'rgba(99, 102, 241, 0.12)', 
+                          border: job.aiMatchScore >= 80 ? '1px solid #10b981' : '1px solid rgba(99, 102, 241, 0.3)', 
+                          color: job.aiMatchScore >= 80 ? '#10b981' : '#818cf8', 
+                          fontSize: '0.75rem', 
+                          padding: '3px 10px', 
+                          borderRadius: '12px', 
+                          fontWeight: '800',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <Sparkles size={12} /> {job.aiMatchScore}% AI MATCH
                         </span>
                       </div>
                       
@@ -307,10 +352,16 @@ const SeekerDashboard = ({ user, socket }) => {
                     <p style={{ margin: 0, fontSize: '0.88rem', color: '#94a3b8' }}>
                       ₹{app.jobId?.salary}/month • {app.jobId?.city}
                     </p>
-                    <div style={{ marginTop: '14px' }}>
+                    <div style={{ marginTop: '14px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                       <span className="role-badge" style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.4)', color: '#818cf8', padding: '6px 16px' }}>
                         {app.status}
                       </span>
+                      <button className="action-btn secondary-btn" style={{ padding: '6px 14px', fontSize: '0.82rem', display: 'inline-flex', gap: '6px', alignItems: 'center', borderRadius: '12px' }} onClick={() => { setSelectedApp(app); setIsChatOpen(true); }}>
+                        <MessageSquare size={14} /> Live Chat
+                      </button>
+                      <button className="action-btn secondary-btn" style={{ padding: '6px 14px', fontSize: '0.82rem', display: 'inline-flex', gap: '6px', alignItems: 'center', borderRadius: '12px' }} onClick={() => { setSelectedApp(app); setIsContractOpen(true); }}>
+                        <FileText size={14} /> View Contract
+                      </button>
                     </div>
                   </div>
 
@@ -413,6 +464,22 @@ const SeekerDashboard = ({ user, socket }) => {
           })}
         </div>
       )}
+      {/* Modals */}
+      <ChatModal 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+        user={user} 
+        recipientName={selectedApp?.providerId?.profile?.companyName || selectedApp?.providerId?.email || 'Employer'} 
+        socket={socket} 
+        roomName={`room_${selectedApp?._id}`} 
+      />
+
+      <ContractModal 
+        isOpen={isContractOpen} 
+        onClose={() => setIsContractOpen(false)} 
+        app={selectedApp} 
+        bond={selectedApp ? bondMap[selectedApp._id?.toString()] : null} 
+      />
     </div>
   );
 };

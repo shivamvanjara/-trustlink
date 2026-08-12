@@ -143,6 +143,18 @@ const ProfileSettings = ({ user, setUser, role }) => {
     ? (profile.fullName || 'Seeker User') 
     : (profile.companyName || 'Provider Enterprise');
 
+  // Calculate Dynamic Protocol Trust Score (0 - 100)
+  const calculateTrustScore = () => {
+    let score = 40; // Base score
+    if (profile.fullName || profile.companyName) score += 15;
+    if (profile.phone) score += 15;
+    if (profile.city) score += 10;
+    if (bonds.length > 0) score += Math.min(20, bonds.length * 10);
+    return Math.min(100, score);
+  };
+
+  const trustScore = calculateTrustScore();
+
   return (
     <div className="dashboard-content" style={{ animation: 'fadeIn 0.5s', display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
       
@@ -179,11 +191,7 @@ const ProfileSettings = ({ user, setUser, role }) => {
               <h2 style={{ fontFamily: 'Outfit', fontSize: '1.8rem', fontWeight: '800', margin: 0, color: '#f8fafc' }}>
                 {displayName}
               </h2>
-              <span className="role-badge" style={{ 
-                background: role === 'seeker' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(16, 185, 129, 0.2)', 
-                color: role === 'seeker' ? '#818cf8' : '#34d399',
-                border: `1px solid ${role === 'seeker' ? 'rgba(99, 102, 241, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`
-              }}>
+              <span className="role-badge" style={{ background: role === 'seeker' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : 'linear-gradient(135deg, #059669, #10b981)', color: '#fff' }}>
                 {role}
               </span>
             </div>
