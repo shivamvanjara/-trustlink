@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, CheckCircle2, Zap, Lock, Users, Sparkles, Building2, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { ShieldCheck, ArrowRight, CheckCircle2, Zap, Lock, Users, Sparkles, Building2, ChevronRight, Briefcase, MessageSquare, DollarSign, Award, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
 import '../MainDashboard.css';
 
@@ -32,9 +32,9 @@ const HomePage = ({ user }) => {
         </div>
 
         <div style={{ display: 'flex', gap: '28px', fontSize: '0.9rem', fontWeight: '600', color: '#94a3b8' }}>
-          <a href="#features" style={{ color: '#94a3b8', textDecoration: 'none' }}>Protocol Features</a>
           <a href="#how-it-works" style={{ color: '#94a3b8', textDecoration: 'none' }}>How It Works</a>
-          <a href="#escrow" style={{ color: '#94a3b8', textDecoration: 'none' }}>Escrow Guarantee</a>
+          <a href="#features" style={{ color: '#94a3b8', textDecoration: 'none' }}>Protocol Features</a>
+          <a href="#provider-demo" style={{ color: '#94a3b8', textDecoration: 'none' }}>Provider Job Manager</a>
         </div>
 
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -67,8 +67,8 @@ const HomePage = ({ user }) => {
             Decentralized Security for On-Demand Workforce Operations
           </h1>
 
-          <p style={{ fontSize: '1.15rem', color: '#94a3b8', maxWdith: '720px', margin: '0 auto 36px', lineHeight: '1.6' }}>
-            TrustLink replaces traditional friction with automated smart escrow deposits, verified AI matchmaking, and instant financial settlement for candidates and enterprises.
+          <p style={{ fontSize: '1.15rem', color: '#94a3b8', maxWidth: '750px', margin: '0 auto 36px', lineHeight: '1.6' }}>
+            TrustLink replaces traditional labor friction with automated smart escrow deposits, verified AI matchmaking, direct candidate messaging, and instant financial settlement.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -83,64 +83,127 @@ const HomePage = ({ user }) => {
         </motion.div>
       </section>
 
-      {/* Corporate Info & Media Placeholder Container */}
-      <section id="features" style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* STEP-BY-STEP WORKFLOW EXPLANATION */}
+      <section id="how-it-works" style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto', borderTop: '1px solid #1e293b' }}>
         
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: '700', margin: '0 0 10px', color: '#fff' }}>Protocol Architecture</h2>
-          <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.95rem' }}>Engineered for transparency, speed, and escrow compliance.</p>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: '800', margin: '0 0 12px', color: '#fff' }}>How TrustLink Protocol Works</h2>
+          <p style={{ color: '#94a3b8', margin: '0 auto', fontSize: '1rem', maxWidth: '600px' }}>
+            A transparent 4-step workflow connecting verified employers with skilled candidates.
+          </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
           
-          {/* Card 1 */}
-          <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ background: 'rgba(79, 70, 229, 0.12)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818cf8' }}>
-              <Zap size={24} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#fff' }}>AI Matchmaking Engine</h3>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              Calculates real-time skill compatibility, geographic proximity, and historical performance metrics to deliver high-precision candidate fits.
+          {/* Step 1 */}
+          <div className="card" style={{ padding: '28px' }}>
+            <div style={{ background: '#4f46e5', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', marginBottom: '16px' }}>1</div>
+            <h4 style={{ margin: '0 0 8px', color: '#fff', fontSize: '1.15rem' }}>Provider Posts Job Opening</h4>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem', lineHeight: '1.6' }}>
+              Employer sets title, city, monthly salary, and required skills. Escrow margin requirements are auto-calculated.
             </p>
-            
-            {/* Image Dropzone Placeholder */}
-            <div style={{ background: '#070d19', border: '1px dashed #334155', borderRadius: '12px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', gap: '8px', marginTop: '10px' }}>
-              <ImageIcon size={28} />
-              <span style={{ fontSize: '0.78rem', fontWeight: '600' }}>[ Custom Image / Graphic Container ]</span>
-            </div>
           </div>
 
-          {/* Card 2 */}
-          <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ background: 'rgba(16, 185, 129, 0.12)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-              <Lock size={24} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#fff' }}>Automated Escrow Vault</h3>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              Funds are secured in escrow prior to job commencement. Automated Razorpay webhooks settle payments directly upon mutual contract completion.
+          {/* Step 2 */}
+          <div className="card" style={{ padding: '28px' }}>
+            <div style={{ background: '#06b6d4', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', marginBottom: '16px' }}>2</div>
+            <h4 style={{ margin: '0 0 8px', color: '#fff', fontSize: '1.15rem' }}>AI Skill Matchmaking</h4>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem', lineHeight: '1.6' }}>
+              Candidates browse positions sorted by AI Match Score %. Employers invite top matches for interviews & 3-day trials.
             </p>
-            
-            {/* Image Dropzone Placeholder */}
-            <div style={{ background: '#070d19', border: '1px dashed #334155', borderRadius: '12px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', gap: '8px', marginTop: '10px' }}>
-              <ImageIcon size={28} />
-              <span style={{ fontSize: '0.78rem', fontWeight: '600' }}>[ Custom Image / Graphic Container ]</span>
-            </div>
           </div>
 
-          {/* Card 3 */}
-          <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ background: 'rgba(245, 158, 11, 0.12)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
-              <CheckCircle2 size={24} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#fff' }}>Dynamic Trust Meter</h3>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              Dynamic trust scoring (0–100) rewards reliable participants with enhanced protocol visibility and lower escrow margin requirements.
+          {/* Step 3 */}
+          <div className="card" style={{ padding: '28px' }}>
+            <div style={{ background: '#10b981', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', marginBottom: '16px' }}>3</div>
+            <h4 style={{ margin: '0 0 8px', color: '#fff', fontSize: '1.15rem' }}>Escrow Security Handshake</h4>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem', lineHeight: '1.6' }}>
+              Both employer and candidate deposit initial token commitments held in TrustLink's automated escrow vault.
             </p>
-            
-            {/* Image Dropzone Placeholder */}
-            <div style={{ background: '#070d19', border: '1px dashed #334155', borderRadius: '12px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', gap: '8px', marginTop: '10px' }}>
-              <ImageIcon size={28} />
-              <span style={{ fontSize: '0.78rem', fontWeight: '600' }}>[ Custom Image / Graphic Container ]</span>
+          </div>
+
+          {/* Step 4 */}
+          <div className="card" style={{ padding: '28px' }}>
+            <div style={{ background: '#f59e0b', color: '#fff', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', marginBottom: '16px' }}>4</div>
+            <h4 style={{ margin: '0 0 8px', color: '#fff', fontSize: '1.15rem' }}>Live Operations & Payout</h4>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.88rem', lineHeight: '1.6' }}>
+              Parties communicate via live socket chat. Upon contract completion, payouts transfer automatically via Razorpay.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* PROVIDER JOB MANAGEMENT DEMO SHOWCASE */}
+      <section id="provider-demo" style={{ padding: '60px 5%', maxWidth: '1200px', margin: '0 auto', borderTop: '1px solid #1e293b' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '40px', alignItems: 'center' }}>
+          
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#818cf8', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', marginBottom: '12px' }}>
+              <Building2 size={16} /> Enterprise Job Management
+            </div>
+            <h2 style={{ fontSize: '2.4rem', fontWeight: '800', color: '#fff', margin: '0 0 16px', lineHeight: '1.2' }}>
+              Effortless Job Posting & Escrow Automation for Employers
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: '1.6', marginBottom: '24px' }}>
+              Employers can post job openings in seconds with multi-select skill tagging, instant location matching, and automated financial escrow deposit previews.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px', color: '#cbd5e1', fontSize: '0.92rem' }}>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <CheckCircle2 size={18} color="#10b981" /> <strong>Multi-Skill Tagging:</strong> Target precise worker qualifications.
+              </li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <CheckCircle2 size={18} color="#10b981" /> <strong>Escrow Calculator Preview:</strong> Real-time breakdown of deposit split.
+              </li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <CheckCircle2 size={18} color="#10b981" /> <strong>1-Click Trial Hiring:</strong> Initiate 3-day candidate trials with automated status tracking.
+              </li>
+            </ul>
+          </div>
+
+          {/* Clean Interactive Mock Card */}
+          <div className="card" style={{ padding: '30px', background: '#0f172a', border: '1px solid #334155' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '16px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Briefcase size={20} color="#818cf8" />
+                <span style={{ fontWeight: '700', color: '#fff', fontSize: '1.05rem' }}>Provider Job Post Interface</span>
+              </div>
+              <span style={{ fontSize: '0.75rem', background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid #10b981', padding: '3px 10px', borderRadius: '12px', fontWeight: '700' }}>
+                LIVE PREVIEW
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.88rem' }}>
+              <div>
+                <label style={{ color: '#94a3b8', fontSize: '0.78rem' }}>Position Title</label>
+                <div style={{ background: '#030712', border: '1px solid #1e293b', padding: '10px 14px', borderRadius: '10px', color: '#fff', fontWeight: '600', marginTop: '4px' }}>
+                  Industrial Plastic Molding Operator
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ color: '#94a3b8', fontSize: '0.78rem' }}>City</label>
+                  <div style={{ background: '#030712', border: '1px solid #1e293b', padding: '10px 14px', borderRadius: '10px', color: '#fff', marginTop: '4px' }}>
+                    Mumbai
+                  </div>
+                </div>
+                <div>
+                  <label style={{ color: '#94a3b8', fontSize: '0.78rem' }}>Monthly Salary</label>
+                  <div style={{ background: '#030712', border: '1px solid #1e293b', padding: '10px 14px', borderRadius: '10px', color: '#fff', fontWeight: '700', marginTop: '4px' }}>
+                    ₹24,000 / month
+                  </div>
+                </div>
+              </div>
+
+              {/* Deposit Box */}
+              <div style={{ background: 'rgba(79, 70, 229, 0.08)', border: '1px solid rgba(79, 70, 229, 0.3)', borderRadius: '12px', padding: '14px' }}>
+                <div style={{ color: '#818cf8', fontWeight: '700', fontSize: '0.82rem', marginBottom: '4px' }}>
+                  🔒 Auto Escrow Split: Employer ₹12,000 | Worker ₹6,000
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '0.76rem' }}>
+                  100% On-Chain Escrow Security • Instant Razorpay Payout
+                </div>
+              </div>
             </div>
           </div>
 
