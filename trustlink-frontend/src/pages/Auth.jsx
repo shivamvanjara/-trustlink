@@ -48,18 +48,19 @@ const Auth = ({ user, setUser, role, setRole }) => {
   const handleLogin1 = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const tId = toast.loading("Verifying credentials & sending OTP email...");
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login-step1`, {
         email: formData.email,
         password: formData.password,
         role: role
       });
-      toast.success(res.data?.message || "6-digit OTP code sent to your email!");
+      toast.success(res.data?.message || "6-digit OTP code sent to your email!", { id: tId });
       setStep(2);
       setResendCooldown(30);
     } catch (err) {
       console.error("Login Step 1 Error:", err);
-      toast.error(err.response?.data?.message || "Invalid Email or Password");
+      toast.error(err.response?.data?.message || "Invalid Email or Password", { id: tId });
     } finally {
       setLoading(false);
     }
@@ -212,7 +213,7 @@ const Auth = ({ user, setUser, role, setRole }) => {
                 style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '1rem' }} 
                 disabled={loading}
               >
-                {loading ? 'Processing Protocol...' : (isSignup ? 'Create Secure Account' : 'Authenticate')} 
+                {loading ? 'Sending Verification Email...' : (isSignup ? 'Create Secure Account' : 'Authenticate')} 
                 <ArrowRight size={18} style={{ marginLeft: '8px' }}/>
               </button>
 
@@ -305,7 +306,7 @@ const Auth = ({ user, setUser, role, setRole }) => {
               <div style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '14px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <Info size={18} color="#818cf8" style={{ flexShrink: 0 }} />
                 <p style={{ margin: 0, fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.4' }}>
-                  Didn't receive email? Check spam folder or use instant code <strong style={{ color: '#38bdf8' }}>123456</strong>.
+                  Didn't receive email? Check your spam/junk folder or click <strong>Resend OTP Code</strong> above.
                 </p>
               </div>
 
@@ -324,4 +325,3 @@ const Auth = ({ user, setUser, role, setRole }) => {
 };
 
 export default Auth;
-
