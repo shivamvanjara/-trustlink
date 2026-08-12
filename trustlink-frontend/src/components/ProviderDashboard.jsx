@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { LayoutGrid, PlusCircle, Users, Activity, Wallet, AlertCircle, CheckCircle2, DollarSign, ShieldCheck, UserCheck, Clock, Award, ArrowUpRight } from 'lucide-react';
+import { LayoutGrid, PlusCircle, Users, Activity, Wallet, AlertCircle, CheckCircle2, DollarSign, ShieldCheck, UserCheck, Clock, Award, ArrowUpRight, MessageSquare, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProviderJobForm from './ProviderJobForm';
 import { API_BASE_URL } from '../apiConfig';
+import ChatModal from './ChatModal';
+import ContractModal from './ContractModal';
 
 const API_BASE = API_BASE_URL;
 
@@ -16,6 +18,9 @@ const ProviderDashboard = ({ user, socket }) => {
   const [myJobs, setMyJobs] = useState([]);
   const [bonds, setBonds] = useState([]);
   const [bondMap, setBondMap] = useState({});
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
 
   const isProfileComplete = () => {
     const p = user?.profile;
@@ -251,10 +256,16 @@ const ProviderDashboard = ({ user, socket }) => {
                           <p style={{ margin: '0 0 10px', fontSize: '0.92rem', color: '#818cf8', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <UserCheck size={16} /> Candidate: {app.seekerId?.profile?.fullName || app.seekerId?.email}
                           </p>
-                          <div>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '6px' }}>
                             <span className="role-badge" style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.4)', color: '#818cf8' }}>
                               {app.status}
                             </span>
+                            <button className="action-btn secondary-btn" style={{ padding: '6px 14px', fontSize: '0.82rem', display: 'inline-flex', gap: '6px', alignItems: 'center', borderRadius: '12px' }} onClick={() => { setSelectedApp(app); setIsChatOpen(true); }}>
+                              <MessageSquare size={14} /> Live Chat
+                            </button>
+                            <button className="action-btn secondary-btn" style={{ padding: '6px 14px', fontSize: '0.82rem', display: 'inline-flex', gap: '6px', alignItems: 'center', borderRadius: '12px' }} onClick={() => { setSelectedApp(app); setIsContractOpen(true); }}>
+                              <FileText size={14} /> View Contract
+                            </button>
                           </div>
                         </div>
 
@@ -363,6 +374,22 @@ const ProviderDashboard = ({ user, socket }) => {
           )}
         </motion.div>
       </AnimatePresence>
+      {/* Modals */}
+      <ChatModal 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+        user={user} 
+        recipientName={selectedApp?.seekerId?.profile?.fullName || selectedApp?.seekerId?.email || 'Candidate'} 
+        socket={socket} 
+        roomName={`room_${selectedApp?._id}`} 
+      />
+
+      <ContractModal 
+        isOpen={isContractOpen} 
+        onClose={() => setIsContractOpen(false)} 
+        app={selectedApp} 
+        bond={selectedApp ? bondMap[selectedApp._id?.toString()] : null} 
+      />
     </div>
   );
 };
